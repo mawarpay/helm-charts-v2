@@ -34,6 +34,14 @@ autoscaling:
 env: {}
 secretEnv: {}
 
+vault:
+  enabled: false
+  stage: dev
+  refreshInterval: 1m
+  common:
+    enabled: true
+    key: common
+
 livenessProbe:
   httpGet:
     path: /health
