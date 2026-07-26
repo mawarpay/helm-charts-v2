@@ -4,10 +4,14 @@ image:
   repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/auth-service-api
 
 service:
+  port: 80
   targetPort: 8080
 
-env:
-  APP_ENV: dev
+ingress:
+  enabled: false
 
-secretEnv:
-  DB_PASSWORD: "ganti-di-dev"
+vault:
+  enabled: true
+  stage: dev
+
+secretEnv: {}
