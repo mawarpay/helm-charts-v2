@@ -36,12 +36,12 @@ env: {}
 secretEnv: {}
 
 vault:
-  enabled: false
+  enabled: true
   stage: dev
   refreshInterval: 1m
   common:
     enabled: true
-    key: common
+    key: general
 
 livenessProbe:
   httpGet:
