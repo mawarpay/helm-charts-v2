@@ -31,11 +31,9 @@ autoscaling:
   maxReplicas: 4
   targetCPUUtilizationPercentage: 80
 
-env: 
-  APP_ENV: dev
+env: {}
   
-secretEnv: 
-  DATABASE_DBNAME: base
+secretEnv: {}
 
 vault:
   enabled: false
