@@ -32,12 +32,8 @@ spec:
             - configMapRef:
                 name: {{ include "app.fullname" . }}
             {{- end }}
-            {{- if .Values.secretEnv }}
-            - secretRef:
-                name: {{ include "app.fullname" . }}
-            {{- end }}
             {{- if .Values.vault.enabled }}
-            - externalSecretRef:
+            - secretRef:
                 name: {{ include "app.fullname" . }}-vault
             {{- end }}
           {{- end }}
