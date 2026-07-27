@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/wallet-service
+  repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/admin-web
 
 service:
   targetPort: 8080
