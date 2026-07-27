@@ -12,3 +12,7 @@ env:
 
 secretEnv: 
   DATABASE_DBNAME: base
+
+envFrom:
+  - secretRef:
+      name: set-status-service-vault
