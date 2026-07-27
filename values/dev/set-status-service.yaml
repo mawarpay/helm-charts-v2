@@ -8,3 +8,6 @@ service:
 
 env:
   APP_ENV: dev
+
+secretEnv: 
+  DATABASE_DBNAME: base
