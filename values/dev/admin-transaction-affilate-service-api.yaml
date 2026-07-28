@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/admin-transaction-affiliate-service-api
+  repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/admin-transaction-affilate-service-api
 
 service:
   targetPort: 8080

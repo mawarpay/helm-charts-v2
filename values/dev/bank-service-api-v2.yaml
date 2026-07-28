@@ -1,0 +1,10 @@
+replicaCount: 1
+
+image:
+  repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/bank-service-api-v2
+
+service:
+  targetPort: 8080
+
+env:
+  APP_ENV: dev
