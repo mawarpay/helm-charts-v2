@@ -1,4 +1,4 @@
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/auth-service-api
@@ -9,6 +9,3 @@ service:
 
 env:
   APP_ENV: dev
-
-secretEnv: 
-  DATABASE_DBNAME: base
