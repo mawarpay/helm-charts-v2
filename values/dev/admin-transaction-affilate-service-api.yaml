@@ -1,0 +1,10 @@
+replicaCount: 1
+
+image:
+  repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/admin-transaction-affiliate-service-api
+
+service:
+  targetPort: 8080
+
+env:
+  APP_ENV: dev
