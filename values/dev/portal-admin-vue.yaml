@@ -1,0 +1,17 @@
+image:
+  repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/portal-admin-vue
+
+service:
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: portal.mawarpay.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+env:
+  APP_ENV: dev
