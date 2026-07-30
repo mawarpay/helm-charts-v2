@@ -1,0 +1,36 @@
+image:
+  repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/portal-admin-vue
+
+# mengalami error 502 jika targetPort tidak di set ke 80
+service:
+  port: 80
+  targetPort: 80
+
+containerPort: 80
+
+# liveness & readiness probe ke Port 80 & Path '/'
+readinessProbe:
+  httpGet:
+    path: /api/v1
+    port: 80
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+livenessProbe:
+  httpGet:
+    path: /api/v1
+    port: 80
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: portal-dev.mawarpay.com
+      paths:
+        - path: /api/v1
+          pathType: Prefix
+
+env:
+  APP_ENV: dev
