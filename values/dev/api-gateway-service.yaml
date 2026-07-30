@@ -8,7 +8,7 @@ ingress:
   enabled: true
   className: nginx
   hosts:
-    - host: api-dev.mawarpay.com
+    - host: api.mawarpay.com
       paths:
         - path: /
           pathType: Prefix
