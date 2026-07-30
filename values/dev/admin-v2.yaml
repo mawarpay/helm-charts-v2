@@ -1,0 +1,14 @@
+image:
+  repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/admin-v2
+service:
+  targetPort: 8080
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: admin.mawarpay.com
+      paths:
+        - path: /
+          pathType: Prefix
+  env:
+    APP_ENV: dev
