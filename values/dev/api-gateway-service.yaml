@@ -2,27 +2,8 @@ image:
   repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/api-gateway-service
 
 service:
-  type: ClusterIP
   port: 80
   targetPort: 8080
-
-readinessProbe:
-  httpGet:
-    path: /health
-    port: 8080
-  initialDelaySeconds: 5
-  periodSeconds: 10
-  timeoutSeconds: 3
-  failureThreshold: 3
-
-livenessProbe:
-  httpGet:
-    path: /health
-    port: 8080
-  initialDelaySeconds: 15
-  periodSeconds: 15
-  timeoutSeconds: 3
-  failureThreshold: 3
 
 ingress:
   enabled: true
@@ -30,17 +11,15 @@ ingress:
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "15"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-origin: "https://portal-dev.mawarpay.com"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS, DELETE"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
   hosts:
-    - host: portal-dev.mawarpay.com
+    - host: api-dev.mawarpay.com
       paths:
-        - path: /api/v1
+        - path: /
           pathType: Prefix
 
 env:
   APP_ENV: dev
-  PORT: "8080"
