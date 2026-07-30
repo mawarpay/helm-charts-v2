@@ -8,9 +8,9 @@ ingress:
   enabled: true
   className: nginx
   hosts:
-    - host: api-dev.mawarpay.com/api/v1
+    - host: portal-dev.mawarpay.com
       paths:
-        - path: /
+        - path: /api/v1
           pathType: Prefix
 
 env:
