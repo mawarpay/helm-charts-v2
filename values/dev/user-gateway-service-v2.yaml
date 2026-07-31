@@ -7,12 +7,15 @@ service:
   port: 80
   targetPort: 8080
 
-# Dinyalakan saat cutover dari user-gateway-service. Host + path di bawah masih
-# dipegang release lama; dua Ingress dengan host+path sama akan bentrok.
+# Melayani /api/v1 di portal-dev.mawarpay.com. Ingress portal-admin-vue tetap
+# memegang "/" di host yang sama dan tidak perlu diubah: controller menggabungkan
+# keduanya jadi satu server block, dan nginx memilih prefix terpanjang - /api/v1
+# ke gateway, sisanya (index.html, /assets/*) ke portal.
+#
 # CORS ditangani gateway sendiri (cors-map), jadi jangan tambah anotasi
 # enable-cors di sini - headernya akan dobel.
 ingress:
-  enabled: false
+  enabled: true
   className: nginx
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
