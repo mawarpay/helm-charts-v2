@@ -1,0 +1,66 @@
+replicaCount: 2
+
+image:
+  repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/user-gateway-service-v2
+
+service:
+  port: 80
+  targetPort: 8080
+
+# Dinyalakan saat cutover dari user-gateway-service. Host + path di bawah masih
+# dipegang release lama; dua Ingress dengan host+path sama akan bentrok.
+# CORS ditangani gateway sendiri (cors-map), jadi jangan tambah anotasi
+# enable-cors di sini - headernya akan dobel.
+ingress:
+  enabled: false
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "64m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  hosts:
+    - host: portal-dev.mawarpay.com
+      paths:
+        - path: /api/v1
+          pathType: Prefix
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 15
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+# Jangan dikosongkan: blok envFrom di deployment.yaml - termasuk secretRef milik
+# Vault - hanya dirender kalau env atau secretEnv terisi.
+# Semua UPSTREAM_* punya default FQDN in-cluster di dalam image.
+env:
+  APP_ENV: dev
+  PORT: "8080"
+  NGINX_UPSTREAM_SCHEME: http
+  UPSTREAM_NAMESPACE: default
+  CLUSTER_DOMAIN: cluster.local
+  UPSTREAM_PORT: "80"
+
+vault:
+  enabled: true
+  stage: dev
+  common:
+    enabled: true
+    key: general
