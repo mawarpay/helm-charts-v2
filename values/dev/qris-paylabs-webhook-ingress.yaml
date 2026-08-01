@@ -1,0 +1,71 @@
+# Public route for inbound PayLabs pay-in notifications.
+#
+# PayLabs posts server-to-server to the notifyUrl we send on create. Before this Ingress
+# existed there was no path from the internet to qris-paylabs-webhook-v2 at all: the only
+# ingress on api-dev.mawarpay.com routes "/" to api-gateway-service, which has no route for
+# provider callbacks. So even a correct PAYLABS_NOTIFY_URL could not be delivered and every
+# QRIS/VA transaction stayed `pending`.
+#
+# Reuses the existing api-dev.mawarpay.com host so no DNS change is needed; the more
+# specific /webhook prefix wins over api-gateway-service's "/" rule. api-gateway-service
+# itself only serves /api/v1/*, so nothing is shadowed.
+#
+# Set the matching values (a real host is required, not a placeholder):
+#   qris-service       PAYLABS_NOTIFY_URL    = https://api-dev.mawarpay.com/webhook/payment
+#   va-service         PAYLABS_NOTIFY_URL_VA = https://api-dev.mawarpay.com/webhook/virtual-account
+#
+# ⚠️ SECURITY — these paths are currently UNAUTHENTICATED.
+# qris-paylabs-webhook verifies the X-Signature header only when WEBHOOK_SIGNATURE_SECRET is
+# set (internal/handler/webhook_handler.go: an empty secret makes verifySignature return
+# true). That variable is NOT present in the qris-paylabs-webhook-v2-vault secret, so anyone
+# who can guess a merchantTradeNo can post status "02" and mark a transaction paid.
+# Exposing the route is what makes settlement work at all, so it is applied on dev — but
+# before this pattern reaches production, do one of:
+#   1. Set WEBHOOK_SIGNATURE_SECRET and configure PayLabs to sign with the matching
+#      HMAC-SHA256(body) hex in X-Signature, or
+#   2. Restrict to PayLabs' egress ranges once they provide them:
+#      nginx.ingress.kubernetes.io/whitelist-source-range: "203.0.113.0/24,198.51.100.7/32"
+#
+# Apply:  kubectl apply -f qris-paylabs-webhook-ingress.yaml
+# Remove: kubectl delete ingress qris-paylabs-webhook-v2 -n default
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: qris-paylabs-webhook-v2
+  namespace: default
+  labels:
+    app.kubernetes.io/name: qris-paylabs-webhook-v2
+    app.kubernetes.io/instance: qris-paylabs-webhook-v2
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: 1m
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api-dev.mawarpay.com
+      http:
+        paths:
+          # QRIS pay-in notification
+          - path: /webhook/payment
+            pathType: Prefix
+            backend:
+              service:
+                name: qris-paylabs-webhook-v2
+                port:
+                  number: 80
+          # Virtual Account pay-in notification
+          - path: /webhook/virtual-account
+            pathType: Prefix
+            backend:
+              service:
+                name: qris-paylabs-webhook-v2
+                port:
+                  number: 80
+          # Disbursement/payout notification
+          - path: /webhook/payout
+            pathType: Prefix
+            backend:
+              service:
+                name: qris-paylabs-webhook-v2
+                port:
+                  number: 80
