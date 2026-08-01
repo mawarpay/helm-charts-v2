@@ -1,0 +1,95 @@
+# ---------------------------------------------------------------------------
+# Values PRODUCTION - diturunkan dari values/dev/admin-gateway-service-v2.yaml.
+#
+# Dev dan prod satu cluster EKS: yang memisahkan cuma namespace (default vs
+# prod) dan path Vault (secret/dev/* vs secret/prod/*).
+#
+# vault.stage dan vault.storeName TIDAK perlu ditulis di sini - workflow deploy
+# memaksanya lewat --set. Kalau ditulis pun akan ditimpa.
+#
+# Sebelum deploy pertama, cek yang bergantung kapasitas/DNS:
+#   - replicaCount & resources di bawah (default dinaikkan ke 2 replica)
+#   - host ingress sudah punya DNS record + sertifikat
+# ---------------------------------------------------------------------------
+
+# Salinan dari mawarpay/helm-charts-v2 -> values/dev/admin-gateway-service-v2.yaml
+#
+# Yang dipakai deploy adalah file di repo helm-charts-v2, BUKAN file ini.
+# Salinan di sini supaya perubahan gateway dan konfigurasi deploy-nya ke-review
+# bareng. Setiap update wajib disalin ke helm-charts-v2 (dan sebaliknya).
+
+replicaCount: 2
+
+image:
+  repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/admin-gateway-service-v2
+
+service:
+  port: 80
+  targetPort: 8080
+
+# Melayani /api di admin.mawarpay.com. Ingress admin-v2 tetap memegang "/"
+# di host yang sama dan tidak perlu diubah: controller menggabungkan keduanya
+# jadi satu server block, dan nginx memilih prefix terpanjang - /api ke gateway,
+# sisanya (index.html, /assets/*) ke SPA admin.
+#
+# Prefix-nya "/api", bukan "/api/v1" seperti di user gateway, karena tabel
+# routing admin juga punya /api/v2/webhook/*. Bundle admin-v2 memakai
+# baseURL relatif `/api`, jadi ini memang same-origin.
+#
+# CORS ditangani gateway sendiri (cors-map + includes/cors-proxy.inc), jadi
+# jangan tambah anotasi enable-cors di sini - headernya akan dobel.
+ingress:
+  # Dinyalakan di commit terpisah setelah image ada di ECR dan pod terbukti
+  # sehat, supaya admin.mawarpay.com tidak sempat mengarah ke Service kosong.
+  enabled: false
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "64m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  hosts:
+    - host: admin.mawarpay.com
+      paths:
+        - path: /api
+          pathType: Prefix
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 15
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+# Jangan dikosongkan: blok envFrom di deployment.yaml - termasuk secretRef milik
+# Vault - hanya dirender kalau env atau secretEnv terisi.
+# Semua UPSTREAM_* punya default FQDN in-cluster di dalam image.
+env:
+  APP_ENV: prod
+  PORT: "8080"
+  NGINX_UPSTREAM_SCHEME: http
+  UPSTREAM_NAMESPACE: prod
+  CLUSTER_DOMAIN: cluster.local
+  UPSTREAM_PORT: "80"
+
+vault:
+  enabled: true
+  stage: prod
+  common:
+    enabled: true
+    key: general

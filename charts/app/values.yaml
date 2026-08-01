@@ -37,7 +37,11 @@ secretEnv: {}
 
 vault:
   enabled: true
+  # stage dan storeName selalu ditimpa --set oleh workflow deploy. Default di
+  # sini sengaja dev supaya `helm template` lokal tetap jalan - jangan pernah
+  # diandalkan sebagai sumber kebenaran untuk prod.
   stage: dev
+  storeName: vault-kv
   refreshInterval: 1m
   common:
     enabled: true
