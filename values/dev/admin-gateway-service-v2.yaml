@@ -19,15 +19,16 @@ service:
 # sisanya (index.html, /assets/*) ke SPA admin.
 #
 # Prefix-nya "/api", bukan "/api/v1" seperti di user gateway, karena tabel
-# routing admin juga punya /api/v2/webhook/*. Bundle admin-v2 memakai
-# baseURL relatif `/api`, jadi ini memang same-origin.
+# routing admin juga punya /api/v2/webhook/*. Bundle admin-v2 mem-bake
+# VITE_API_BASE_URL=https://admin-dev.mawarpay.com/api/v1 - host yang sama
+# dengan SPA, jadi tetap same-origin dan tercakup prefix /api ini.
 #
 # CORS ditangani gateway sendiri (cors-map + includes/cors-proxy.inc), jadi
 # jangan tambah anotasi enable-cors di sini - headernya akan dobel.
 ingress:
-  # Dinyalakan di commit terpisah setelah image ada di ECR dan pod terbukti
-  # sehat, supaya admin-dev.mawarpay.com tidak sempat mengarah ke Service kosong.
-  enabled: false
+  # Prasyarat sudah terpenuhi: image ada di ECR dan Deployment
+  # admin-gateway-service-v2 jalan 2/2 di namespace default.
+  enabled: true
   className: nginx
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
