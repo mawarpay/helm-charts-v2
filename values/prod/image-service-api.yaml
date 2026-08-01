@@ -1,0 +1,23 @@
+# ---------------------------------------------------------------------------
+# Values PRODUCTION - diturunkan dari values/dev/image-service-api.yaml.
+#
+# Dev dan prod satu cluster EKS: yang memisahkan cuma namespace (default vs
+# prod) dan path Vault (secret/dev/* vs secret/prod/*).
+#
+# vault.stage dan vault.storeName TIDAK perlu ditulis di sini - workflow deploy
+# memaksanya lewat --set. Kalau ditulis pun akan ditimpa.
+#
+# Sebelum deploy pertama, cek yang bergantung kapasitas/DNS:
+#   - replicaCount & resources di bawah (default dinaikkan ke 2 replica)
+#   - host ingress sudah punya DNS record + sertifikat
+# ---------------------------------------------------------------------------
+
+replicaCount: 2
+image:
+  repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/image-service-api
+
+service:
+  targetPort: 8080
+
+env:
+  APP_ENV: prod

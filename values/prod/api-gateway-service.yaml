@@ -1,0 +1,41 @@
+# ---------------------------------------------------------------------------
+# Values PRODUCTION - diturunkan dari values/dev/api-gateway-service.yaml.
+#
+# Dev dan prod satu cluster EKS: yang memisahkan cuma namespace (default vs
+# prod) dan path Vault (secret/dev/* vs secret/prod/*).
+#
+# vault.stage dan vault.storeName TIDAK perlu ditulis di sini - workflow deploy
+# memaksanya lewat --set. Kalau ditulis pun akan ditimpa.
+#
+# Sebelum deploy pertama, cek yang bergantung kapasitas/DNS:
+#   - replicaCount & resources di bawah (default dinaikkan ke 2 replica)
+#   - host ingress sudah punya DNS record + sertifikat
+# ---------------------------------------------------------------------------
+
+replicaCount: 2
+
+image:
+  repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/api-gateway-service
+
+service:
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://portal.mawarpay.com"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS, DELETE"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+  hosts:
+    - host: api.mawarpay.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+env:
+  APP_ENV: prod

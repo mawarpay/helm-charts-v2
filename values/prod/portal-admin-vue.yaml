@@ -1,0 +1,59 @@
+# ---------------------------------------------------------------------------
+# Values PRODUCTION - diturunkan dari values/dev/portal-admin-vue.yaml.
+#
+# Dev dan prod satu cluster EKS: yang memisahkan cuma namespace (default vs
+# prod) dan path Vault (secret/dev/* vs secret/prod/*).
+#
+# vault.stage dan vault.storeName TIDAK perlu ditulis di sini - workflow deploy
+# memaksanya lewat --set. Kalau ditulis pun akan ditimpa.
+#
+# Sebelum deploy pertama, cek yang bergantung kapasitas/DNS:
+#   - replicaCount & resources di bawah (default dinaikkan ke 2 replica)
+#   - host ingress sudah punya DNS record + sertifikat
+# ---------------------------------------------------------------------------
+
+replicaCount: 2
+
+image:
+  repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/portal-admin-vue
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+
+containerPort: 80
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: 80
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: 80
+  initialDelaySeconds: 10
+  periodSeconds: 15
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Mengizinkan upload asset/gambar jika ada di frontend
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+  hosts:
+    - host: portal.mawarpay.com
+      paths:
+        - path: /
+          pathType: Prefix
+          
+env:
+  APP_ENV: prod
