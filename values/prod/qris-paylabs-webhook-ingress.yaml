@@ -1,0 +1,84 @@
+# Ingress PRODUCTION untuk callback pay-in PayLabs.
+#
+# BELUM DITERAPKAN. Disiapkan untuk direview, bukan untuk di-apply buta.
+#
+# Kenapa file ini ada
+# -------------------
+# values/prod/qris-paylabs-webhook-v2.yaml tidak punya bagian `ingress:`, dan
+# namespace prod belum punya ingress apa pun. Artinya begitu prod di-deploy,
+# tidak ada jalur dari internet ke qris-paylabs-webhook — persis kondisi dev
+# sebelum 2026-08-01, yang membuat setiap transaksi VA/QRIS berhenti di
+# `pending` tanpa satu pun error di log. PayLabs mengirim notifikasi
+# server-to-server; kalau notifyUrl tidak bisa dijangkau, pembayaran yang sudah
+# lunas tidak pernah tercatat lunas.
+#
+# Diturunkan dari values/dev/qris-paylabs-webhook-ingress.yaml yang sudah
+# terbukti jalan di dev. Host `api.mawarpay.com` diambil dari
+# values/prod/api-gateway-service.yaml (bukan tebakan); prefix /webhook lebih
+# spesifik sehingga menang atas rule "/" milik api-gateway-service, dan gateway
+# itu sendiri hanya melayani /api/v1/* dan /api/v2/* sehingga tidak ada yang
+# tertutup.
+#
+# Prasyarat sebelum apply
+# -----------------------
+#  1. DNS record + sertifikat untuk api.mawarpay.com sudah ada
+#     (values/prod/qris-paylabs-webhook-v2.yaml sendiri mensyaratkan ini).
+#  2. WEBHOOK_SIGNATURE_SECRET terisi di Vault path secret/prod/* — TANPA ini
+#     verifikasi tanda tangan mati dan endpoint menerima body apa pun dari
+#     siapa pun, padahal endpoint ini mengubah status transaksi dan saldo
+#     wallet. Lihat dokumentasi Chapter 06, risiko nomor 2.
+#  3. notifyUrl yang didaftarkan ke PayLabs untuk production menunjuk ke sini:
+#       QRIS : https://api.mawarpay.com/webhook/payment
+#       VA   : https://api.mawarpay.com/webhook/virtual-account
+#     dan PAYLABS_NOTIFY_URL / PAYLABS_NOTIFY_URL_VA di secret/prod/* diisi
+#     nilai yang sama. Jangan biarkan placeholder — di dev nilainya sempat
+#     terisi literal "https://<callback-url>" dan lolos begitu saja.
+#
+# Apply : kubectl apply -f qris-paylabs-webhook-ingress.yaml
+# Hapus : kubectl delete ingress qris-paylabs-webhook-v2 -n prod
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: qris-paylabs-webhook-v2
+  namespace: prod
+  labels:
+    app.kubernetes.io/name: qris-paylabs-webhook-v2
+    app.kubernetes.io/instance: qris-paylabs-webhook-v2
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: 1m
+    # Kalau PayLabs sudah memberi rentang IP egress mereka, aktifkan ini —
+    # ini satu-satunya pembatasan IP yang benar-benar bekerja. Env
+    # WHITELIST_IPS di aplikasi terdokumentasi tapi tidak pernah ditegakkan
+    # kodenya (lihat Chapter 06, risiko nomor 12).
+    # nginx.ingress.kubernetes.io/whitelist-source-range: "203.0.113.0/24"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api.mawarpay.com
+      http:
+        paths:
+          # Notifikasi pay-in QRIS
+          - path: /webhook/payment
+            pathType: Prefix
+            backend:
+              service:
+                name: qris-paylabs-webhook-v2
+                port:
+                  number: 80
+          # Notifikasi pay-in Virtual Account
+          - path: /webhook/virtual-account
+            pathType: Prefix
+            backend:
+              service:
+                name: qris-paylabs-webhook-v2
+                port:
+                  number: 80
+          # Notifikasi disbursement/payout
+          - path: /webhook/payout
+            pathType: Prefix
+            backend:
+              service:
+                name: qris-paylabs-webhook-v2
+                port:
+                  number: 80
