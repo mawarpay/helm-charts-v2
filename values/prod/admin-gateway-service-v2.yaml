@@ -8,7 +8,8 @@
 # memaksanya lewat --set. Kalau ditulis pun akan ditimpa.
 #
 # Sebelum deploy pertama, cek yang bergantung kapasitas/DNS:
-#   - replicaCount & resources di bawah (default dinaikkan ke 2 replica)
+#   - replicaCount & resources di bawah (default 1 replica, lihat catatan di
+#     bawah replicaCount)
 #   - host ingress sudah punya DNS record + sertifikat
 # ---------------------------------------------------------------------------
 
@@ -18,7 +19,17 @@
 # Salinan di sini supaya perubahan gateway dan konfigurasi deploy-nya ke-review
 # bareng. Setiap update wajib disalin ke helm-charts-v2 (dan sebaliknya).
 
-replicaCount: 2
+# Diturunkan 2 -> 1 replica (2026-08-06).
+#
+# Alasannya kapasitas, sama seperti catatan CPU di bawah: 35 service x 2
+# replica tidak muat di lima node dan menyisakan 76 pod Pending. Dengan 1
+# replica semua service bisa dijadwalkan.
+#
+# Konsekuensinya prod jalan tanpa redundansi - rolling update dan node drain
+# berarti downtime singkat per service. Ini kompromi sadar selama quota vCPU
+# akun (16, sudah penuh; request naik ke 64 masih PENDING) belum naik.
+# Kembalikan ke 2 setelah node bertambah.
+replicaCount: 1
 
 image:
   repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/admin-gateway-service-v2
@@ -56,7 +67,7 @@ ingress:
 
 resources:
   requests:
-    cpu: 100m
+    cpu: 25m
     memory: 128Mi
   limits:
     cpu: 500m

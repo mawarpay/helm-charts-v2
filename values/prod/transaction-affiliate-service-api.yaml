@@ -8,11 +8,22 @@
 # memaksanya lewat --set. Kalau ditulis pun akan ditimpa.
 #
 # Sebelum deploy pertama, cek yang bergantung kapasitas/DNS:
-#   - replicaCount & resources di bawah (default dinaikkan ke 2 replica)
+#   - replicaCount & resources di bawah (default 1 replica, lihat catatan di
+#     bawah replicaCount)
 #   - host ingress sudah punya DNS record + sertifikat
 # ---------------------------------------------------------------------------
 
-replicaCount: 2
+# Diturunkan 2 -> 1 replica (2026-08-06).
+#
+# Alasannya kapasitas, sama seperti catatan CPU di bawah: 35 service x 2
+# replica tidak muat di lima node dan menyisakan 76 pod Pending. Dengan 1
+# replica semua service bisa dijadwalkan.
+#
+# Konsekuensinya prod jalan tanpa redundansi - rolling update dan node drain
+# berarti downtime singkat per service. Ini kompromi sadar selama quota vCPU
+# akun (16, sudah penuh; request naik ke 64 masih PENDING) belum naik.
+# Kembalikan ke 2 setelah node bertambah.
+replicaCount: 1
 image:
   repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/transaction-affiliate-service-api
 
@@ -22,3 +33,22 @@ service:
 
 env:
   APP_ENV: prod
+
+# CPU request diturunkan 100m -> 25m (2026-08-06).
+#
+# Bukan penghematan, tapi supaya pod bisa dijadwalkan sama sekali: 35 service
+# x 2 replica x 100m = 7 CPU request, sementara lima node cuma punya ~12 vCPU
+# dan sudah 95-98% ter-request. Pemakaian CPU nyata di node cuma 2-21%, jadi
+# 100m itu over-request sekitar 4x - schedulerlah yang kehabisan, bukan CPU.
+#
+# Quota vCPU EC2 akun ini 16 dan sudah terpakai penuh (request naik ke 64
+# sedang PENDING), jadi menambah node bukan pilihan yang tersedia sekarang.
+# Kalau quota sudah naik dan node bertambah, angka ini boleh dinaikkan lagi -
+# tapi ukur dulu pakai `kubectl top pods -n prod`, jangan balik ke 100m
+# begitu saja.
+#
+# limits sengaja tidak diturunkan: burst saat startup (migrasi GORM, koneksi
+# pool) butuh ruang, dan limits tidak ikut dihitung scheduler.
+resources:
+  requests:
+    cpu: 25m
