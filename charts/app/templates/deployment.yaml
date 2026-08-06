@@ -28,7 +28,7 @@ spec:
               containerPort: {{ .Values.service.targetPort }}
           {{- if or .Values.env .Values.secretEnv }}
           envFrom:
-            {{- if .Values.env }}
+            {{- if .Values.enabled }}
             - configMapRef:
                 name: {{ include "app.fullname" . }}
             {{- end }}
