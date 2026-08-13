@@ -9,3 +9,7 @@ service:
 
 env:
   APP_ENV: dev
+  EMAIL_SERVICE_URL: http://email-service-api.default.svc.cluster.local
+  # TODO: confirm the real dev portal URL (this is a guess based on the
+  # localhost origin already in CORS_ALLOWED_ORIGINS) and replace it.
+  PASSWORD_RESET_URL_BASE: http://localhost:3020/reset-password
