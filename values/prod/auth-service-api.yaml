@@ -22,3 +22,5 @@ service:
 
 env:
   APP_ENV: prod
+  EMAIL_SERVICE_URL: http://email-service-api.prod.svc.cluster.local
+  PASSWORD_RESET_URL_BASE: https://portal.mawarpay.com/reset-password
