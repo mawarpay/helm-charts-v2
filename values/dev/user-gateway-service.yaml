@@ -27,7 +27,7 @@ ingress:
   enabled: true
   className: nginx
   hosts:
-    - host: portal-dev.mawarpay.com
+    - host: portal-sandbox.mawarpay.com
       paths:
         - path: /api/v1
           pathType: Prefix

@@ -13,14 +13,14 @@ service:
   port: 80
   targetPort: 8080
 
-# Melayani /api di admin-dev.mawarpay.com. Ingress admin-v2 tetap memegang "/"
+# Melayani /api di admin-sandbox.mawarpay.com. Ingress admin-v2 tetap memegang "/"
 # di host yang sama dan tidak perlu diubah: controller menggabungkan keduanya
 # jadi satu server block, dan nginx memilih prefix terpanjang - /api ke gateway,
 # sisanya (index.html, /assets/*) ke SPA admin.
 #
 # Prefix-nya "/api", bukan "/api/v1" seperti di user gateway, karena tabel
 # routing admin juga punya /api/v2/webhook/*. Bundle admin-v2 mem-bake
-# VITE_API_BASE_URL=https://admin-dev.mawarpay.com/api/v1 - host yang sama
+# VITE_API_BASE_URL=https://admin-sandbox.mawarpay.com/api/v1 - host yang sama
 # dengan SPA, jadi tetap same-origin dan tercakup prefix /api ini.
 #
 # CORS ditangani gateway sendiri (cors-map + includes/cors-proxy.inc), jadi
@@ -36,7 +36,7 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
   hosts:
-    - host: admin-dev.mawarpay.com
+    - host: admin-sandbox.mawarpay.com
       paths:
         - path: /api
           pathType: Prefix

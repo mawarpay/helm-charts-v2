@@ -2,17 +2,17 @@
 #
 # PayLabs posts server-to-server to the notifyUrl we send on create. Before this Ingress
 # existed there was no path from the internet to qris-paylabs-webhook-v2 at all: the only
-# ingress on api-dev.mawarpay.com routes "/" to api-gateway-service, which has no route for
+# ingress on api-sandbox.mawarpay.com routes "/" to api-gateway-service, which has no route for
 # provider callbacks. So even a correct PAYLABS_NOTIFY_URL could not be delivered and every
 # QRIS/VA transaction stayed `pending`.
 #
-# Reuses the existing api-dev.mawarpay.com host so no DNS change is needed; the more
+# Reuses the existing api-sandbox.mawarpay.com host so no DNS change is needed; the more
 # specific /webhook prefix wins over api-gateway-service's "/" rule. api-gateway-service
 # itself only serves /api/v1/*, so nothing is shadowed.
 #
 # Set the matching values (a real host is required, not a placeholder):
-#   qris-service       PAYLABS_NOTIFY_URL    = https://api-dev.mawarpay.com/webhook/payment
-#   va-service         PAYLABS_NOTIFY_URL_VA = https://api-dev.mawarpay.com/webhook/virtual-account
+#   qris-service       PAYLABS_NOTIFY_URL    = https://api-sandbox.mawarpay.com/webhook/payment
+#   va-service         PAYLABS_NOTIFY_URL_VA = https://api-sandbox.mawarpay.com/webhook/virtual-account
 #
 # ⚠️ SECURITY — these paths are currently UNAUTHENTICATED.
 # qris-paylabs-webhook verifies the X-Signature header only when WEBHOOK_SIGNATURE_SECRET is
@@ -42,7 +42,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: api-dev.mawarpay.com
+    - host: api-sandbox.mawarpay.com
       http:
         paths:
           # QRIS pay-in notification
