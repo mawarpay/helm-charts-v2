@@ -27,7 +27,7 @@ ingress:
   enabled: true
   className: nginx
   hosts:
-    - host: admin-dev.mawarpay.com
+    - host: admin-sandbox.mawarpay.com
       paths:
         - path: /
           pathType: Prefix
