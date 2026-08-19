@@ -7,7 +7,7 @@ service:
   port: 80
   targetPort: 8080
 
-# Melayani /api/v1 di portal-dev.mawarpay.com. Ingress portal-admin-vue tetap
+# Melayani /api/v1 di portal-sandbox.mawarpay.com. Ingress portal-admin-vue tetap
 # memegang "/" di host yang sama dan tidak perlu diubah: controller menggabungkan
 # keduanya jadi satu server block, dan nginx memilih prefix terpanjang - /api/v1
 # ke gateway, sisanya (index.html, /assets/*) ke portal.
@@ -23,7 +23,7 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
   hosts:
-    - host: portal-dev.mawarpay.com
+    - host: portal-sandbox.mawarpay.com
       paths:
         - path: /api/v1
           pathType: Prefix

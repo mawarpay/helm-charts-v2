@@ -12,4 +12,4 @@ env:
   EMAIL_SERVICE_URL: http://email-service-api.default.svc.cluster.local
   # Confirmed via values/dev/portal-admin-vue.yaml ingress host (dev pair of
   # the prod portal.mawarpay.com shown in the reset-password screenshot).
-  PASSWORD_RESET_URL_BASE: https://portal-dev.mawarpay.com/reset-password
+  PASSWORD_RESET_URL_BASE: https://portal-sandbox.mawarpay.com/reset-password

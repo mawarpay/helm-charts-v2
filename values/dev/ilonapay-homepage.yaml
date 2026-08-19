@@ -34,7 +34,7 @@ ingress:
     # Mengizinkan upload asset/gambar jika ada di frontend
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
   hosts:
-    - host: dev.mawarpay.com
+    - host: sandbox.mawarpay.com
       paths:
         - path: /
           pathType: Prefix
