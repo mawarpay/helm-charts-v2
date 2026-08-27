@@ -32,8 +32,18 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
 
 env: {}
-  
+
 secretEnv: {}
+
+# Opt-in only. Every release today implicitly runs as the namespace's
+# "default" ServiceAccount (this chart never set serviceAccountName before -
+# see app.serviceAccountName in _helpers.tpl). Set create: true for a service
+# that needs its own identity, e.g. for IRSA (eks.amazonaws.com/role-arn
+# annotation) instead of static long-lived cloud credentials in Vault.
+serviceAccount:
+  create: false
+  name: ""
+  annotations: {}
 
 vault:
   enabled: true
