@@ -16,3 +16,18 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/name: {{ include "app.fullname" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+Resolves to a per-release ServiceAccount name when serviceAccount.create is
+true (e.g. for IRSA), otherwise falls back to "default" - the implicit
+behavior every existing release already has today, since this chart never
+set serviceAccountName before. Opt-in only, so this is a no-op for every
+service that doesn't set serviceAccount.create.
+*/}}
+{{- define "app.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "app.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}
