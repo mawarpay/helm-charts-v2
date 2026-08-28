@@ -21,3 +21,18 @@ service:
 
 env:
   APP_ENV: prod
+
+# PP-155: IRSA instead of static S3_ACCESS_KEY/S3_SECRET_KEY in Vault. The S3
+# client (internal/storage/s3/s3.go) already falls back to the AWS SDK's
+# default credential chain - which picks up IRSA automatically - whenever
+# those two fields are empty, so no app code change was needed.
+#
+# Sequencing: do NOT blank S3_ACCESS_KEY/S3_SECRET_KEY in
+# secret/prod/image-service-api until AFTER this deploys successfully with
+# the new ServiceAccount - removing them first would break the currently
+# running pods, which still need static creds until their replacement is
+# live.
+serviceAccount:
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::672061768993:role/image-service-api-prod-s3"
