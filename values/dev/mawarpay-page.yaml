@@ -1,5 +1,5 @@
 image:
-  repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/ilonapay-homepage
+  repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/mawarpay-page
 
 service:
   type: ClusterIP
