@@ -4,7 +4,24 @@ image:
   repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/api-gateway-service-api
 
 service:
+  port: 80
   targetPort: 8080
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://portal-sandbox.mawarpay.com"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS, DELETE"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+  hosts:
+    - host: sandbox.mawarpay.com
+      paths:
+        - path: /
+          pathType: Prefix
 
 env:
   APP_ENV: dev
