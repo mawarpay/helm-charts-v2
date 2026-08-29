@@ -4,6 +4,7 @@ image:
   repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/wallet-service-api
 
 service:
+  port: 80
   targetPort: 8080
 
 env:
