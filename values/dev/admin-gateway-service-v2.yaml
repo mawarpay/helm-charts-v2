@@ -4,7 +4,7 @@
 # Salinan di sini supaya perubahan gateway dan konfigurasi deploy-nya ke-review
 # bareng. Setiap update wajib disalin ke helm-charts-v2 (dan sebaliknya).
 
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: 672061768993.dkr.ecr.ap-southeast-1.amazonaws.com/admin-gateway-service-v2
