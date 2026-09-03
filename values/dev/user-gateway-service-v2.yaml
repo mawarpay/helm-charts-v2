@@ -23,7 +23,7 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
   hosts:
-    - host: portal-sandbox.mawarpay.com
+    - host: usergateway-sandbox.mawarpay.com
       paths:
         - path: /api/v1
           pathType: Prefix
